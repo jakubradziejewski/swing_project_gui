@@ -1,6 +1,12 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
+import java.util.Random;
+import java.util.Map;
+import java.util.HashMap;
 
 public class GameGUI extends JFrame {
     private final Simulation simulation;
@@ -84,13 +90,65 @@ public class GameGUI extends JFrame {
         private static final Color CARROT_COLOR = new Color(255, 140, 0); // Bright orange
         private static final Color FARMER_COLOR = new Color(30, 144, 255); // Bright blue
         private static final Font ENTITY_FONT = new Font("Arial", Font.BOLD, 14);
+        private final Random random = new Random();
+        private final Map<Farmer, Boolean> farmerImages = new HashMap<>();
+        // Image fields
+        private BufferedImage rabbitImage;
+        private BufferedImage farmerImage;
+        private BufferedImage farmer1Image;
+        private BufferedImage carrotImage;
+        private BufferedImage dogImage;
 
         public GamePanel(int fieldSize) {
             this.fieldSize = fieldSize;
             setPreferredSize(new Dimension(fieldSize * CELL_SIZE, fieldSize * CELL_SIZE));
+            loadImages();
+        }
+
+        private void loadImages() {
+            try {
+                rabbitImage = ImageIO.read(new File("./img/rabbit.jpg"));
+                System.out.println("Rabbit image loaded successfully");
+            } catch (IOException e) {
+                System.out.println("Rabbit image could not be loaded. Using fallback shape.");
+            }
+            boolean atLeastOneFarmerImageLoaded = false;
+            try {
+                farmerImage = ImageIO.read(new File("./img/farmer.jpg"));
+                System.out.println("Farmer image loaded successfully");
+            } catch (IOException e) {
+                System.out.println("Farmer image could not be loaded. Using fallback shape.");
+            }
+            try {
+                farmer1Image = ImageIO.read(new File("./img/farmer1.jpg"));
+                atLeastOneFarmerImageLoaded = true;
+                System.out.println("Farmer1 image loaded successfully");
+            } catch (IOException e) {
+                System.out.println("farmer1.jpg could not be loaded.");
+            }
+
+            try {
+                carrotImage = ImageIO.read(new File("./img/carrot.png"));
+                System.out.println("Carrot image loaded successfully");
+            } catch (IOException e) {
+                System.out.println("Carrot image could not be loaded. Using fallback shape.");
+            }
+
+            try {
+                dogImage = ImageIO.read(new File("./img/dog.jpg"));
+                System.out.println("Dog image loaded successfully");
+            } catch (IOException e) {
+                System.out.println("Dog image could not be loaded. Using fallback shape.");
+            }
         }
 
         public void updateGrid(Grid grid) {
+            for (Entity entity : grid.getEntities()) {
+                if (entity instanceof Farmer && !farmerImages.containsKey(entity)) {
+                    // Assign a random image choice (true/false) for new farmers
+                    farmerImages.put((Farmer)entity, random.nextBoolean());
+                }
+            }
             this.grid = grid;
         }
 
@@ -134,17 +192,21 @@ public class GameGUI extends JFrame {
                 case EMPTY:
                     break;
                 case GROWING:
-                    g.setColor(new Color(144, 238, 144)); // Light green
+                    g.setColor(new Color(92, 236, 92)); // Light green
                     g.fillOval(px + 5, py + 5, CELL_SIZE - 10, CELL_SIZE - 10);
                     g.setColor(Color.BLACK);
                     String growthText = String.valueOf(cell.getGrowthStage());
                     drawCenteredString(g, growthText, px, py);
                     break;
                 case READY:
-                    g.setColor(CARROT_COLOR);
-                    g.fillOval(px + 5, py + 5, CELL_SIZE - 10, CELL_SIZE - 10);
-                    g.setColor(Color.WHITE);
-                    drawCenteredString(g, "C", px, py);
+                    if (carrotImage != null) {
+                        g.drawImage(carrotImage, px + 5, py + 5, CELL_SIZE - 10, CELL_SIZE - 10, null);
+                    } else {
+                        g.setColor(CARROT_COLOR);
+                        g.fillOval(px + 5, py + 5, CELL_SIZE - 10, CELL_SIZE - 10);
+                        g.setColor(Color.WHITE);
+                        drawCenteredString(g, "C", px, py);
+                    }
                     break;
                 case DAMAGED:
                     g.setColor(Color.RED);
@@ -160,34 +222,42 @@ public class GameGUI extends JFrame {
             int py = pos[1] * CELL_SIZE;
 
             if (entity instanceof Farmer) {
-                g.setColor(FARMER_COLOR);
-                g.fillOval(px + 5, py + 5, CELL_SIZE - 10, CELL_SIZE - 10);
-                g.setColor(Color.WHITE);
-                drawCenteredString(g, "F", px, py);
-            } else if (entity instanceof Dog) {
-                g.setColor(Color.BLACK);
-                g.fillRect(px + 5, py + 5, CELL_SIZE - 10, CELL_SIZE - 10);
-                g.setColor(Color.WHITE);
-                drawCenteredString(g, "D", px, py);
+                if (farmerImage != null || farmer1Image != null) {
+                    BufferedImage selectedImage;
+                    if (farmerImage != null && farmer1Image != null) {
+                        // Use the stored choice for this farmer
+                        boolean useFirstImage = farmerImages.getOrDefault(entity, true);
+                        selectedImage = useFirstImage ? farmerImage : farmer1Image;
+                    } else {
+                        selectedImage = farmerImage != null ? farmerImage : farmer1Image;
+                    }
+                    g.drawImage(selectedImage, px + 5, py + 5, CELL_SIZE - 10, CELL_SIZE - 10, null);
+                } else {
+                    g.setColor(FARMER_COLOR);
+                    g.fillOval(px + 5, py + 5, CELL_SIZE - 10, CELL_SIZE - 10);
+                    g.setColor(Color.WHITE);
+                    drawCenteredString(g, "F", px, py);
+                }}
+                else if (entity instanceof Dog) {
+                if (dogImage != null) {
+                    g.drawImage(dogImage, px + 5, py + 5, CELL_SIZE - 10, CELL_SIZE - 10, null);
+                } else {
+                    g.setColor(Color.BLACK);
+                    g.fillRect(px + 5, py + 5, CELL_SIZE - 10, CELL_SIZE - 10);
+                    g.setColor(Color.WHITE);
+                    drawCenteredString(g, "D", px, py);
+                }
             } else if (entity instanceof Rabbit) {
-                g.setColor(Color.RED);
-                int[] xPoints = {px + CELL_SIZE/2, px + 10, px + CELL_SIZE - 10};
-                int[] yPoints = {py + 10, py + CELL_SIZE - 10, py + CELL_SIZE - 10};
-                g.fillPolygon(xPoints, yPoints, 3);
-                g.setColor(Color.WHITE);
-                FontMetrics metrics = g.getFontMetrics();
-                String text = "R";
-                int textWidth = metrics.stringWidth(text);
-                int textHeight = metrics.getHeight();
-
-                // Calculate center point of triangle (average of the three points)
-                int centerX = (xPoints[0] + xPoints[1] + xPoints[2]) / 3;
-                int centerY = (yPoints[0] + yPoints[1] + yPoints[2]) / 3;
-
-                // Draw the text centered in the triangle
-                g.drawString(text,
-                        centerX - textWidth/2,
-                        centerY + textHeight/4);
+                if (rabbitImage != null) {
+                    g.drawImage(rabbitImage, px + 5, py + 5, CELL_SIZE - 10, CELL_SIZE - 10, null);
+                } else {
+                    g.setColor(Color.RED);
+                    int[] xPoints = {px + CELL_SIZE/2, px + 10, px + CELL_SIZE - 10};
+                    int[] yPoints = {py + 10, py + CELL_SIZE - 10, py + CELL_SIZE - 10};
+                    g.fillPolygon(xPoints, yPoints, 3);
+                    g.setColor(Color.WHITE);
+                    drawCenteredString(g, "R", px, py + 10);
+                }
             }
         }
 
