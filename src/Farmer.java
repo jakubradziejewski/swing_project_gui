@@ -20,10 +20,10 @@ public class Farmer extends Entity {
                 Cell currentCell = grid.getCell(x, y);
 
                 if (currentCell.getState() == CellState.DAMAGED) {
-                    Thread.sleep(REPAIR_TIME);
+                    Thread.sleep(GameConfig.getInstance().getFarmerRepairTime());
                     currentCell.repair();
                 } else if (currentCell.getState() == CellState.EMPTY) {
-                    Thread.sleep(PLANT_TIME);
+                    Thread.sleep(GameConfig.getInstance().getFarmerPlantTime());
                     currentCell.plant();
                 }
 

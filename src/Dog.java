@@ -1,6 +1,5 @@
 
 public class Dog extends Entity {
-    private static final int DETECTION_RANGE = 5;
     private Rabbit target;
 
     public Dog(int x, int y, Grid grid) {
@@ -23,7 +22,8 @@ public class Dog extends Entity {
                         target = null;
                     }
                 } else {
-                    target = grid.findNearbyRabbit(x, y, DETECTION_RANGE);
+                    int detectionRange = GameConfig.getInstance().getDogDetectionRange();
+                    target = grid.findNearbyRabbit(x, y, detectionRange);
                     moveRandomly();
                 }
                 Thread.sleep(800);

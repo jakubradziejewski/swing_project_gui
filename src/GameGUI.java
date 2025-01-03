@@ -271,32 +271,15 @@ public class GameGUI extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            int fieldSize = 10;
-            int numFarmers = 2;
+            SetupDialog setup = new SetupDialog(null);
+            setup.setVisible(true);
 
-            try {
-                fieldSize = Integer.parseInt(JOptionPane.showInputDialog(
-                        null,
-                        "Enter field size (5-20):",
-                        "Setup",
-                        JOptionPane.QUESTION_MESSAGE
-                ));
-
-                numFarmers = Integer.parseInt(JOptionPane.showInputDialog(
-                        null,
-                        "Enter number of farmers (1-5):",
-                        "Setup",
-                        JOptionPane.QUESTION_MESSAGE
-                ));
-            } catch (NumberFormatException | NullPointerException e) {
-                // Use default values if input is invalid or cancelled
+            if (!setup.isCancelled()) {
+                GameGUI game = new GameGUI(setup.getFieldSize(), setup.getFarmerCount());
+                game.start();
+            } else {
+                System.exit(0);
             }
-
-            GameGUI game = new GameGUI(
-                    Math.min(Math.max(fieldSize, 5), 20),
-                    Math.min(Math.max(numFarmers, 1), 5)
-            );
-            game.start();
         });
     }
 }

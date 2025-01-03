@@ -32,7 +32,7 @@ public class Simulation {
         growthThread = new Thread(() -> {
             while (running) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(GameConfig.getInstance().getCarrotGrowthTime());
                     spawnRabbit();
                     grid.updateGrowth();
                 } catch (InterruptedException e) {
@@ -77,7 +77,7 @@ public class Simulation {
     }
 
     private void spawnRabbit() {
-        if (random.nextDouble() < 0.3) { // 30% chance to spawn a rabbit
+        if (random.nextDouble() < GameConfig.getInstance().getRabbitSpawnRate()) { // 30% chance to spawn a rabbit
             Rabbit rabbit = new Rabbit(
                     random.nextInt(grid.getSize()),
                     random.nextInt(grid.getSize()),
