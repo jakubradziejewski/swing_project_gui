@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 
+// Dialog for configuring game settings - initial window
 public class GameConfigDialog extends JDialog {
     private final JSpinner fieldSizeSpinner;
     private final JSpinner farmerCountSpinner;
@@ -12,13 +13,13 @@ public class GameConfigDialog extends JDialog {
     private boolean cancelled = true;
     private final boolean isInitialSetup;
 
+    // Initialize dialog with current configuration
     public GameConfigDialog(Frame owner, boolean isInitialSetup) {
         super(owner, isInitialSetup ? "Game Setup" : "Game Configuration", true);
         this.isInitialSetup = isInitialSetup;
 
         GameConfig config = GameConfig.getInstance();
 
-        // Create spinners with current/default values
         fieldSizeSpinner = new JSpinner(new SpinnerNumberModel(10, 5, 20, 1));
         farmerCountSpinner = new JSpinner(new SpinnerNumberModel(2, 1, 5, 1));
         spawnRateSpinner = new JSpinner(new SpinnerNumberModel(
@@ -32,21 +33,18 @@ public class GameConfigDialog extends JDialog {
         plantTimeSpinner = new JSpinner(new SpinnerNumberModel(
                 config.getFarmerPlantTime(), 500, 10000, 500));
 
-        // Layout
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Game Setup section (only shown during initial setup)
         if (isInitialSetup) {
             addSectionLabel("Game Setup", 0, gbc);
             addConfigField("Field Size:", fieldSizeSpinner, 1, gbc);
             addConfigField("Number of Farmers:", farmerCountSpinner, 2, gbc);
         }
 
-        // Game Parameters section
         addSectionLabel("Game Parameters", isInitialSetup ? 3 : 0, gbc);
         addConfigField("Rabbit Spawn Rate:", spawnRateSpinner, isInitialSetup ? 4 : 1, gbc);
         addConfigField("Carrot Growth Time (ms):", growthTimeSpinner, isInitialSetup ? 5 : 2, gbc);
@@ -54,7 +52,6 @@ public class GameConfigDialog extends JDialog {
         addConfigField("Farmer Repair Time (ms):", repairTimeSpinner, isInitialSetup ? 7 : 4, gbc);
         addConfigField("Farmer Plant Time (ms):", plantTimeSpinner, isInitialSetup ? 8 : 5, gbc);
 
-        // Buttons
         JPanel buttonPanel = new JPanel();
         JButton confirmButton = new JButton(isInitialSetup ? "Start Game" : "Save");
         JButton cancelButton = new JButton("Cancel");
@@ -76,12 +73,12 @@ public class GameConfigDialog extends JDialog {
         gbc.anchor = GridBagConstraints.CENTER;
         add(buttonPanel, gbc);
 
-        // Dialog properties
         setMinimumSize(new Dimension(400, isInitialSetup ? 500 : 400));
         pack();
         setLocationRelativeTo(owner);
     }
 
+    // Add a section label to the dialog
     private void addSectionLabel(String text, int row, GridBagConstraints gbc) {
         JLabel label = new JLabel(text);
         label.setFont(label.getFont().deriveFont(Font.BOLD));
@@ -92,6 +89,7 @@ public class GameConfigDialog extends JDialog {
         gbc.gridwidth = 1;
     }
 
+    // Add a configuration field to the dialog
     private void addConfigField(String label, JComponent component, int row, GridBagConstraints gbc) {
         gbc.gridx = 0;
         gbc.gridy = row;
@@ -101,6 +99,7 @@ public class GameConfigDialog extends JDialog {
         add(component, gbc);
     }
 
+    // Save configuration changes
     private void saveConfig() {
         GameConfig config = GameConfig.getInstance();
         config.setRabbitSpawnRate((Double) spawnRateSpinner.getValue());
@@ -110,14 +109,17 @@ public class GameConfigDialog extends JDialog {
         config.setFarmerPlantTime((Integer) plantTimeSpinner.getValue());
     }
 
+    // Check if dialog was cancelled
     public boolean isCancelled() {
         return cancelled;
     }
 
+    // Get selected field size
     public int getFieldSize() {
         return isInitialSetup ? (Integer) fieldSizeSpinner.getValue() : -1;
     }
 
+    // Get selected number of farmers
     public int getFarmerCount() {
         return isInitialSetup ? (Integer) farmerCountSpinner.getValue() : -1;
     }

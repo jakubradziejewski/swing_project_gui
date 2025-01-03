@@ -18,16 +18,15 @@ public class GameGUI extends JFrame {
     private static final int CELL_SIZE = 40;
     private static final int REFRESH_RATE = 100;
 
+    // Initialize GUI with field size and number of farmers
     public GameGUI(int fieldSize, int numFarmers) {
         this.simulation = new Simulation(fieldSize, numFarmers);
         this.gamePanel = new GamePanel(fieldSize);
 
-        // Setup frame
         setTitle("Carrot Farm Simulation");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // Create control panel
         JPanel controlPanel = new JPanel();
         saveButton = new JButton("Save");
         loadButton = new JButton("Load");
@@ -37,25 +36,22 @@ public class GameGUI extends JFrame {
         controlPanel.add(loadButton);
         controlPanel.add(quitButton);
 
-        // Add components
         add(gamePanel, BorderLayout.CENTER);
         add(controlPanel, BorderLayout.SOUTH);
 
-        // Setup button actions
         setupButtonActions();
 
-        // Setup refresh timer
         refreshTimer = new Timer(REFRESH_RATE, e -> {
             gamePanel.updateGrid(simulation.getGrid());
             repaint();
         });
 
-        // Size and display
         pack();
         setLocationRelativeTo(null);
         setResizable(false);
     }
 
+    // Set up button actions
     private void setupButtonActions() {
         saveButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
@@ -78,33 +74,37 @@ public class GameGUI extends JFrame {
         });
     }
 
+    // Start the simulation and GUI
     public void start() {
         setVisible(true);
         simulation.startSimulation();
         refreshTimer.start();
     }
 
+    // Inner class for the game panel
     private static class GamePanel extends JPanel {
         private Grid grid;
         private final int fieldSize;
-        private static final Color CARROT_COLOR = new Color(255, 140, 0); // Bright orange
-        private static final Color FARMER_COLOR = new Color(30, 144, 255); // Bright blue
+        private static final Color CARROT_COLOR = new Color(255, 140, 0);
+        private static final Color FARMER_COLOR = new Color(30, 144, 255);
         private static final Font ENTITY_FONT = new Font("Arial", Font.BOLD, 14);
         private final Random random = new Random();
         private final Map<Farmer, Boolean> farmerImages = new HashMap<>();
-        // Image fields
+
         private BufferedImage rabbitImage;
         private BufferedImage farmerImage;
         private BufferedImage farmer1Image;
         private BufferedImage carrotImage;
         private BufferedImage dogImage;
 
+        // Initialize game panel with field size
         public GamePanel(int fieldSize) {
             this.fieldSize = fieldSize;
             setPreferredSize(new Dimension(fieldSize * CELL_SIZE, fieldSize * CELL_SIZE));
             loadImages();
         }
 
+        // Load images for entities
         private void loadImages() {
             try {
                 rabbitImage = ImageIO.read(new File("./img/rabbit.jpg"));
@@ -142,10 +142,10 @@ public class GameGUI extends JFrame {
             }
         }
 
+        // Update grid state
         public void updateGrid(Grid grid) {
             for (Entity entity : grid.getEntities()) {
                 if (entity instanceof Farmer && !farmerImages.containsKey(entity)) {
-                    // Assign a random image choice (true/false) for new farmers
                     farmerImages.put((Farmer)entity, random.nextBoolean());
                 }
             }
@@ -153,6 +153,7 @@ public class GameGUI extends JFrame {
         }
 
         @Override
+        // Paint the grid and entities
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             if (grid == null) return;
@@ -161,14 +162,12 @@ public class GameGUI extends JFrame {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setFont(ENTITY_FONT);
 
-            // Draw grid
             for (int x = 0; x < fieldSize; x++) {
                 for (int y = 0; y < fieldSize; y++) {
                     drawCell(g2d, x, y);
                 }
             }
 
-            // Draw entities
             for (Entity entity : grid.getEntities()) {
                 if (entity.isActive()) {
                     drawEntity(g2d, entity);
@@ -176,23 +175,22 @@ public class GameGUI extends JFrame {
             }
         }
 
+        // Draw a single cell
         private void drawCell(Graphics2D g, int x, int y) {
             Cell cell = grid.getCell(x, y);
             int px = x * CELL_SIZE;
             int py = y * CELL_SIZE;
 
-            // Draw cell background
             g.setColor(Color.WHITE);
             g.fillRect(px, py, CELL_SIZE, CELL_SIZE);
             g.setColor(Color.LIGHT_GRAY);
             g.drawRect(px, py, CELL_SIZE, CELL_SIZE);
 
-            // Draw cell content
             switch (cell.getState()) {
                 case EMPTY:
                     break;
                 case GROWING:
-                    g.setColor(new Color(92, 236, 92)); // Light green
+                    g.setColor(new Color(92, 236, 92));
                     g.fillOval(px + 5, py + 5, CELL_SIZE - 10, CELL_SIZE - 10);
                     g.setColor(Color.BLACK);
                     String growthText = String.valueOf(cell.getGrowthStage());
@@ -216,6 +214,7 @@ public class GameGUI extends JFrame {
             }
         }
 
+        // Draw an entity
         private void drawEntity(Graphics2D g, Entity entity) {
             int[] pos = entity.getPosition();
             int px = pos[0] * CELL_SIZE;
@@ -225,7 +224,6 @@ public class GameGUI extends JFrame {
                 if (farmerImage != null || farmer1Image != null) {
                     BufferedImage selectedImage;
                     if (farmerImage != null && farmer1Image != null) {
-                        // Use the stored choice for this farmer
                         boolean useFirstImage = farmerImages.getOrDefault(entity, true);
                         selectedImage = useFirstImage ? farmerImage : farmer1Image;
                     } else {
@@ -261,6 +259,7 @@ public class GameGUI extends JFrame {
             }
         }
 
+        // Draw centered string in a cell
         private void drawCenteredString(Graphics2D g, String text, int cellX, int cellY) {
             FontMetrics metrics = g.getFontMetrics();
             int x = cellX + (CELL_SIZE - metrics.stringWidth(text)) / 2;
@@ -269,6 +268,7 @@ public class GameGUI extends JFrame {
         }
     }
 
+    // Main method to start the game
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             GameConfigDialog setup = new GameConfigDialog(null, true);

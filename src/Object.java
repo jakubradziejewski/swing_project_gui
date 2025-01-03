@@ -1,3 +1,4 @@
+// Base class for all objects in the simulation
 public abstract class Object {
     protected int x;
     protected int y;
@@ -7,11 +8,6 @@ public abstract class Object {
         this.x = x;
         this.y = y;
         this.isActive = true;
-    }
-
-    public void move(int newX, int newY) {
-        this.x = newX;
-        this.y = newY;
     }
 
     public int[] getPosition() {

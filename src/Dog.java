@@ -1,18 +1,20 @@
-
 public class Dog extends Entity {
     private Rabbit target;
 
+    // Initialize dog with position and grid
     public Dog(int x, int y, Grid grid) {
         super(x, y, grid, 1);
-        grid.addEntity(this); // Ensure the dog is added to the grid
+        grid.addEntity(this);
     }
 
+    // Set target rabbit to chase
     public void setTarget(Rabbit rabbit) {
         this.target = rabbit;
     }
 
     @Override
     public void run() {
+        // Main behavior loop for the dog
         while (running) {
             try {
                 if (target != null && target.isActive()) {
@@ -34,6 +36,7 @@ public class Dog extends Entity {
         }
     }
 
+    // Move towards the target rabbit
     private void moveTowardsTarget() {
         int[] targetPos = target.getPosition();
         x += Integer.compare(targetPos[0], x);

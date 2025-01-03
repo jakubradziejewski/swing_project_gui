@@ -1,21 +1,19 @@
-//import java.util.Random;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.io.Serializable;
 
-public class Grid implements Serializable{
+public class Grid implements Serializable {
     private final int size;
     private final Cell[][] grid;
     private transient List<Entity> entities;
     private static final long serialVersionUID = 1L;
 
+    // Initialize grid with given size
     public Grid(int size) {
         this.size = size;
         this.grid = new Cell[size][size];
         this.entities = new CopyOnWriteArrayList<>();
-        //this.random = new Random();
 
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
@@ -23,10 +21,13 @@ public class Grid implements Serializable{
             }
         }
     }
+
+    // Custom deserialization
     private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
         in.defaultReadObject();
         this.entities = new CopyOnWriteArrayList<>();
     }
+
 
     public boolean isValidPosition(int x, int y) {
         return x >= 0 && x < size && y >= 0 && y < size;
@@ -65,6 +66,7 @@ public class Grid implements Serializable{
             }
         }
     }
+
     public void clearEntities() {
         entities.clear();
     }

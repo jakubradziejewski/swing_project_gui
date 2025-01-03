@@ -9,8 +9,8 @@ public class Simulation {
     private final List<Entity> entities;
     private volatile boolean running;
     private final Random random;
-    private final int numFarmers; // Store the number of farmers for reinitialization
-    private Thread growthThread; // Store reference to the growth/rabbit spawning thread
+    private final int numFarmers;
+    private Thread growthThread;
 
     public Grid getGrid() {
         return this.grid;
@@ -23,12 +23,12 @@ public class Simulation {
         this.random = new Random();
         this.numFarmers = numFarmers;
 
-        // Initialize farmers
         initializeFarmers();
         initializeGrowthThread();
     }
+
+    // Initialize (but don't start) the growth thread
     private void initializeGrowthThread() {
-        // Initialize (but don't start) the growth thread
         growthThread = new Thread(() -> {
             while (running) {
                 try {
@@ -42,12 +42,12 @@ public class Simulation {
             }
         });
     }
+
+    // Initialize farmers
     private void initializeFarmers() {
-        // Clear existing entities and threads
         entities.clear();
         entityThreads.clear();
 
-        // Initialize farmers
         for (int i = 0; i < numFarmers; i++) {
             Farmer farmer = new Farmer(
                     random.nextInt(grid.getSize()),
@@ -59,25 +59,25 @@ public class Simulation {
         }
     }
 
+    // Start threads; if state is loaded -> restart the simulation
     public void startSimulation() {
         running = true;
 
-        // Start entity threads
         for (Entity entity : entities) {
             Thread thread = new Thread(entity);
             entityThreads.add(thread);
             thread.start();
         }
 
-        // Rabbit spawning and growth update thread
         if (growthThread == null || !growthThread.isAlive()) {
             initializeGrowthThread();
         }
         growthThread.start();
     }
 
+    // Spawn rabbits with user defined spawn rate
     private void spawnRabbit() {
-        if (random.nextDouble() < GameConfig.getInstance().getRabbitSpawnRate()) { // 30% chance to spawn a rabbit
+        if (random.nextDouble() < GameConfig.getInstance().getRabbitSpawnRate()) {
             Rabbit rabbit = new Rabbit(
                     random.nextInt(grid.getSize()),
                     random.nextInt(grid.getSize()),
@@ -90,6 +90,7 @@ public class Simulation {
         }
     }
 
+    // Stop the simulation
     public void stopSimulation() {
         running = false;
         for (Entity entity : entities) {
@@ -98,7 +99,7 @@ public class Simulation {
         for (Thread thread : entityThreads) {
             thread.interrupt();
             try {
-                thread.join(1000); // Wait for threads to finish with timeout
+                thread.join(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -113,12 +114,11 @@ public class Simulation {
             growthThread = null;
         }
 
-        // Clear thread lists
         entityThreads.clear();
     }
 
+    // Save game state to file
     public void saveState(String filename) {
-        // Create a serializable state object
         GridState state = new GridState(grid);
 
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
@@ -129,21 +129,17 @@ public class Simulation {
         }
     }
 
+    // Load game state from file
     public void loadState(String filename) {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
             GridState loadedState = (GridState) ois.readObject();
 
-            // Stop current simulation
             stopSimulation();
             grid.clearEntities();
 
-            // Apply the loaded state
             loadedState.applyTo(this.grid);
             initializeFarmers();
-
             System.out.println("Game state loaded successfully.");
-
-            // Restart simulation
             startSimulation();
         } catch (IOException | ClassNotFoundException e) {
             System.err.println("Failed to load game state: " + e.getMessage());

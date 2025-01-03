@@ -1,16 +1,14 @@
-// GameConfig.java
 import java.io.Serializable;
+
+// Singleton class for game configuration
 public class GameConfig implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    // Game parameters with default values
     private double rabbitSpawnRate;
     private int carrotGrowthTime;
     private int dogDetectionRange;
     private int farmerRepairTime;
     private int farmerPlantTime;
 
-    // Singleton instance
     private static GameConfig instance;
 
     // Constructor with default values
@@ -18,6 +16,7 @@ public class GameConfig implements Serializable {
         setDefaultValues();
     }
 
+    // Set default configuration values
     private void setDefaultValues() {
         rabbitSpawnRate = 0.3;
         carrotGrowthTime = 1000; // milliseconds
@@ -26,6 +25,7 @@ public class GameConfig implements Serializable {
         farmerPlantTime = 2000; // milliseconds
     }
 
+    // Get singleton instance
     public static GameConfig getInstance() {
         if (instance == null) {
             instance = new GameConfig();
@@ -33,7 +33,7 @@ public class GameConfig implements Serializable {
         return instance;
     }
 
-    // Getters and setters with validation
+    // Getters and setters for all configuration values
     public double getRabbitSpawnRate() {
         return rabbitSpawnRate;
     }
