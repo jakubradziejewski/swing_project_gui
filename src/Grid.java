@@ -3,11 +3,13 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-public class Grid {
+import java.io.Serializable;
+
+public class Grid implements Serializable{
     private final int size;
     private final Cell[][] grid;
-    private final List<Entity> entities;
-    //private final Random random;
+    private transient List<Entity> entities;
+    private static final long serialVersionUID = 1L;
 
     public Grid(int size) {
         this.size = size;
@@ -20,6 +22,10 @@ public class Grid {
                 grid[i][j] = new Cell();
             }
         }
+    }
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        this.entities = new CopyOnWriteArrayList<>();
     }
 
     public boolean isValidPosition(int x, int y) {
@@ -58,6 +64,9 @@ public class Grid {
                 grid[i][j].grow();
             }
         }
+    }
+    public void clearEntities() {
+        entities.clear();
     }
 
     public int getSize() {

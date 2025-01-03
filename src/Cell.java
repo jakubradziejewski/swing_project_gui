@@ -1,4 +1,7 @@
-public class Cell {
+import java.io.Serializable;
+
+public class Cell implements Serializable{
+    private static final long serialVersionUID = 1L;
     private CellState state;
     private int growthStage;
     private static final int MAX_GROWTH = 5;

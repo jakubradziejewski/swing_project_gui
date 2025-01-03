@@ -1,4 +1,6 @@
-public enum CellState {
+import java.io.Serializable;
+
+public enum CellState implements Serializable{
     EMPTY,
     GROWING,
     READY,

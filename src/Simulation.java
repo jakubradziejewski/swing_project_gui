@@ -9,6 +9,8 @@ public class Simulation {
     private final List<Entity> entities;
     private volatile boolean running;
     private final Random random;
+    private final int numFarmers; // Store the number of farmers for reinitialization
+    private Thread growthThread; // Store reference to the growth/rabbit spawning thread
 
     public Grid getGrid() {
         return this.grid;
@@ -19,12 +21,37 @@ public class Simulation {
         this.entityThreads = new ArrayList<>();
         this.entities = new ArrayList<>();
         this.random = new Random();
+        this.numFarmers = numFarmers;
+
+        // Initialize farmers
+        initializeFarmers();
+        initializeGrowthThread();
+    }
+    private void initializeGrowthThread() {
+        // Initialize (but don't start) the growth thread
+        growthThread = new Thread(() -> {
+            while (running) {
+                try {
+                    Thread.sleep(1000);
+                    spawnRabbit();
+                    grid.updateGrowth();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        });
+    }
+    private void initializeFarmers() {
+        // Clear existing entities and threads
+        entities.clear();
+        entityThreads.clear();
 
         // Initialize farmers
         for (int i = 0; i < numFarmers; i++) {
             Farmer farmer = new Farmer(
-                    random.nextInt(fieldSize),
-                    random.nextInt(fieldSize),
+                    random.nextInt(grid.getSize()),
+                    random.nextInt(grid.getSize()),
                     grid
             );
             entities.add(farmer);
@@ -43,18 +70,10 @@ public class Simulation {
         }
 
         // Rabbit spawning and growth update thread
-        new Thread(() -> {
-            while (running) {
-                try {
-                    Thread.sleep(1000);
-                    spawnRabbit();
-                    grid.updateGrowth();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
-            }
-        }).start();
+        if (growthThread == null || !growthThread.isAlive()) {
+            initializeGrowthThread();
+        }
+        growthThread.start();
     }
 
     private void spawnRabbit() {
@@ -84,11 +103,26 @@ public class Simulation {
                 Thread.currentThread().interrupt();
             }
         }
+        if (growthThread != null) {
+            growthThread.interrupt();
+            try {
+                growthThread.join(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            growthThread = null;
+        }
+
+        // Clear thread lists
+        entityThreads.clear();
     }
 
     public void saveState(String filename) {
+        // Create a serializable state object
+        GridState state = new GridState(grid);
+
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
-            oos.writeObject(grid);
+            oos.writeObject(state);
             System.out.println("Game state saved successfully.");
         } catch (IOException e) {
             System.err.println("Failed to save game state: " + e.getMessage());
@@ -97,14 +131,20 @@ public class Simulation {
 
     public void loadState(String filename) {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
-            Grid loadedGrid = (Grid) ois.readObject();
+            GridState loadedState = (GridState) ois.readObject();
+
             // Stop current simulation
             stopSimulation();
+            grid.clearEntities();
 
-            // Update grid state
-            // Note: You might need to implement a proper way to copy state from loadedGrid to current grid
-            // or make Grid implement proper serialization
+            // Apply the loaded state
+            loadedState.applyTo(this.grid);
+            initializeFarmers();
+
             System.out.println("Game state loaded successfully.");
+
+            // Restart simulation
+            startSimulation();
         } catch (IOException | ClassNotFoundException e) {
             System.err.println("Failed to load game state: " + e.getMessage());
         }

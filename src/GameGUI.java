@@ -238,7 +238,7 @@ public class GameGUI extends JFrame {
                     g.setColor(Color.WHITE);
                     drawCenteredString(g, "F", px, py);
                 }}
-                else if (entity instanceof Dog) {
+            else if (entity instanceof Dog) {
                 if (dogImage != null) {
                     g.drawImage(dogImage, px + 5, py + 5, CELL_SIZE - 10, CELL_SIZE - 10, null);
                 } else {
