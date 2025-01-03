@@ -271,7 +271,7 @@ public class GameGUI extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            SetupDialog setup = new SetupDialog(null);
+            GameConfigDialog setup = new GameConfigDialog(null, true);
             setup.setVisible(true);
 
             if (!setup.isCancelled()) {
