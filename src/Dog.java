@@ -12,6 +12,13 @@ public class Dog extends Entity {
         this.target = rabbit;
     }
 
+    // Move towards the target rabbit
+    private void moveTowardsTarget() {
+        int[] targetPos = target.getPosition();
+        x += Integer.compare(targetPos[0], x);
+        y += Integer.compare(targetPos[1], y);
+    }
+
     @Override
     public void run() {
         // Main behavior loop for the dog
@@ -36,10 +43,5 @@ public class Dog extends Entity {
         }
     }
 
-    // Move towards the target rabbit
-    private void moveTowardsTarget() {
-        int[] targetPos = target.getPosition();
-        x += Integer.compare(targetPos[0], x);
-        y += Integer.compare(targetPos[1], y);
-    }
+
 }

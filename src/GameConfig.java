@@ -3,13 +3,14 @@ import java.io.Serializable;
 // Singleton class for game configuration
 public class GameConfig implements Serializable {
     private static final long serialVersionUID = 1L;
-    private double rabbitSpawnRate;
+    private static GameConfig instance;
+
     private int carrotGrowthTime;
-    private int dogDetectionRange;
     private int farmerRepairTime;
     private int farmerPlantTime;
 
-    private static GameConfig instance;
+    private double rabbitSpawnRate;
+    private int dogDetectionRange;
 
     // Constructor with default values
     private GameConfig() {
@@ -18,11 +19,12 @@ public class GameConfig implements Serializable {
 
     // Set default configuration values
     private void setDefaultValues() {
+        carrotGrowthTime = 1000;
+        farmerRepairTime = 3000;
+        farmerPlantTime = 2000;
+
         rabbitSpawnRate = 0.3;
-        carrotGrowthTime = 1000; // milliseconds
         dogDetectionRange = 5;
-        farmerRepairTime = 3000; // milliseconds
-        farmerPlantTime = 2000; // milliseconds
     }
 
     // Get singleton instance
@@ -33,65 +35,49 @@ public class GameConfig implements Serializable {
         return instance;
     }
 
-    // Getters and setters for all configuration values
-    public double getRabbitSpawnRate() {
-        return rabbitSpawnRate;
+    // Getters and setters with validation
+    private void validatePositiveValue(int value, String fieldName) {
+        if (value <= 0) {
+            throw new IllegalArgumentException(fieldName + " must be positive");
+        }
     }
 
-    public void setRabbitSpawnRate(double rate) {
-        if (rate >= 0.0 && rate <= 1.0) {
-            this.rabbitSpawnRate = rate;
-        } else {
+    private void validateSpawnRate(double rate) {
+        if (rate < 0.0 || rate > 1.0) {
             throw new IllegalArgumentException("Spawn rate must be between 0.0 and 1.0");
         }
     }
 
-    public int getCarrotGrowthTime() {
-        return carrotGrowthTime;
-    }
-
+    // Time-related getters and setters
+    public int getCarrotGrowthTime() { return carrotGrowthTime; }
     public void setCarrotGrowthTime(int time) {
-        if (time > 0) {
-            this.carrotGrowthTime = time;
-        } else {
-            throw new IllegalArgumentException("Growth time must be positive");
-        }
+        validatePositiveValue(time, "Growth time");
+        carrotGrowthTime = time;
     }
 
-    public int getDogDetectionRange() {
-        return dogDetectionRange;
-    }
-
-    public void setDogDetectionRange(int range) {
-        if (range > 0) {
-            this.dogDetectionRange = range;
-        } else {
-            throw new IllegalArgumentException("Detection range must be positive");
-        }
-    }
-
-    public int getFarmerRepairTime() {
-        return farmerRepairTime;
-    }
-
+    public int getFarmerRepairTime() { return farmerRepairTime; }
     public void setFarmerRepairTime(int time) {
-        if (time > 0) {
-            this.farmerRepairTime = time;
-        } else {
-            throw new IllegalArgumentException("Repair time must be positive");
-        }
+        validatePositiveValue(time, "Repair time");
+        farmerRepairTime = time;
     }
 
-    public int getFarmerPlantTime() {
-        return farmerPlantTime;
-    }
-
+    public int getFarmerPlantTime() { return farmerPlantTime; }
     public void setFarmerPlantTime(int time) {
-        if (time > 0) {
-            this.farmerPlantTime = time;
-        } else {
-            throw new IllegalArgumentException("Plant time must be positive");
-        }
+        validatePositiveValue(time, "Plant time");
+        farmerPlantTime = time;
+    }
+
+    // Game mechanics getters and setters
+    public double getRabbitSpawnRate() { return rabbitSpawnRate; }
+    public void setRabbitSpawnRate(double rate) {
+        validateSpawnRate(rate);
+        rabbitSpawnRate = rate;
+    }
+
+    public int getDogDetectionRange() { return dogDetectionRange; }
+    public void setDogDetectionRange(int range) {
+        validatePositiveValue(range, "Detection range");
+        dogDetectionRange = range;
     }
 }
 

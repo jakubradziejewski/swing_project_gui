@@ -2,18 +2,18 @@ import java.util.Random;
 
 // Base class for all entities in the simulation
 public abstract class Entity extends Object implements Runnable {
-    protected int speed;
-    protected Random random;
     protected Grid grid;
+    protected Random random;
     protected volatile boolean running;
+    protected int speed;
 
     // Initialize entity with position, grid, and speed
     public Entity(int x, int y, Grid grid, int speed) {
         super(x, y);
         this.grid = grid;
-        this.speed = speed;
         this.random = new Random();
         this.running = true;
+        this.speed = speed;
     }
 
     // Move entity randomly within the grid

@@ -4,17 +4,21 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.io.Serializable;
 
 public class Grid implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final int size;
     private final Cell[][] grid;
     private transient List<Entity> entities;
-    private static final long serialVersionUID = 1L;
+
 
     // Initialize grid with given size
     public Grid(int size) {
         this.size = size;
         this.grid = new Cell[size][size];
         this.entities = new CopyOnWriteArrayList<>();
+        initializeGrid();
+    }
 
+    private void initializeGrid() {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 grid[i][j] = new Cell();
@@ -28,11 +32,20 @@ public class Grid implements Serializable {
         this.entities = new CopyOnWriteArrayList<>();
     }
 
+    // Grid state methods
+    public Cell getCell(int x, int y) {
+        return grid[x][y];
+    }
+
+    public int getSize() {
+        return size;
+    }
 
     public boolean isValidPosition(int x, int y) {
         return x >= 0 && x < size && y >= 0 && y < size;
     }
 
+    // Entity management methods
     public void addEntity(Entity entity) {
         entities.add(entity);
     }
@@ -41,22 +54,29 @@ public class Grid implements Serializable {
         entities.remove(entity);
     }
 
-    public Cell getCell(int x, int y) {
-        return grid[x][y];
+    public List<Entity> getEntities() {
+        return new ArrayList<>(entities);
     }
+
+    public void clearEntities() {
+        entities.clear();
+    }
+
 
     public Rabbit findNearbyRabbit(int x, int y, int range) {
         for (Entity entity : entities) {
             if (entity instanceof Rabbit && entity.isActive()) {
                 int[] pos = entity.getPosition();
-                int dx = Math.abs(pos[0] - x);
-                int dy = Math.abs(pos[1] - y);
-                if (dx <= range && dy <= range) {
+                if (isInRange(x, y, pos[0], pos[1], range)) {
                     return (Rabbit) entity;
                 }
             }
         }
         return null;
+    }
+
+    private boolean isInRange(int x1, int y1, int x2, int y2, int range) {
+        return Math.abs(x2 - x1) <= range && Math.abs(y2 - y1) <= range;
     }
 
     public void updateGrowth() {
@@ -67,15 +87,5 @@ public class Grid implements Serializable {
         }
     }
 
-    public void clearEntities() {
-        entities.clear();
-    }
 
-    public int getSize() {
-        return size;
-    }
-
-    public List<Entity> getEntities() {
-        return new ArrayList<>(entities);
-    }
 }
