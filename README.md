@@ -8,7 +8,7 @@
 
 Multi-threaded Java Swing application simulating a carrot farm where farmers plant crops, rabbits try to eat them, and dogs chase the rabbits away. Each entity runs independently on its own thread.
 
-**University Project:** Created as coursework for Object-Oriented Programming classes.
+Created as university project for Object-Oriented Programming classes.
 
 ---
 
@@ -62,15 +62,51 @@ Built with Java Swing using custom rendering with `Graphics2D`. Refreshes at 100
 
 ## 🚀 Quick Start
 
-```bash
-# Compile
-javac *.java
+### Prerequisites
+- Java Development Kit (JDK) 8+
 
-# Run
-java GameGUI
+### Project Structure
+```
+swing_project/
+├── src/
+│   ├── config/
+│   ├── core/
+│   ├── entities/
+│   ├── grid/
+│   └── ui/
+├── bin/
+├── config/
+│   └── game.properties (optional)
+└── img/ (optional)
 ```
 
-Initial dialog lets you set field size (5-20), number of farmers (1-5), and game parameters.
+### Compilation & Running
+
+**Windows:**
+```powershell
+javac -d bin src/config/*.java src/core/*.java src/entities/*.java src/grid/*.java src/ui/*.java
+java -cp bin ui.GameGUI
+```
+
+**Linux/Mac:**
+```bash
+javac -d bin src/*/*.java
+java -cp bin ui.GameGUI
+```
+
+
+### Configuration File (Optional)
+
+Create `config/game.properties` to customize defaults:
+```properties
+carrotGrowthTime=1000
+farmerRepairTime=3000
+farmerPlantTime=2000
+rabbitSpawnRate=0.3
+dogDetectionRange=5
+```
+
+If not present, the application uses built-in default values.
 
 ---
 
@@ -97,3 +133,5 @@ Optional: Add images to `img/` directory (`rabbit.jpg`, `farmer.jpg`, `farmer1.j
 ## 💾 Save/Load
 
 Saves grid cell states, growth stages, and config parameters using Java serialization. Entity positions and threads aren't saved - farmers respawn randomly when you load, rabbits and dogs are cleared.
+
+---
